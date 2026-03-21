@@ -1,4 +1,5 @@
 import os
+import random
 import telebot
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 
@@ -8,9 +9,81 @@ OWNER_ID  = int(os.environ.get("OWNER_ID"))
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
+# ── Account Pool ───────────────────────────────────────────────────────────────
+ACCOUNT_POOL = [
+    {
+        "first_name": "Deogrej",
+        "last_name": "🚫",
+        "username": "Sekanulkejixas1918@gmail.com",
+        "password": "FAIiowla6HS72"
+    },
+    {
+        "first_name": "Marlvin",
+        "last_name": "🚫",
+        "username": "Trowbeckgdpb921@gmail.com",
+        "password": "Xp92#mLqR7"
+    },
+    {
+        "first_name": "Jobrina",
+        "last_name": "🚫",
+        "username": "jobryinamvweltz044@gmail.com",
+        "password": "Bv83!qZnT1"
+    },
+    {
+        "first_name": "Huxley",
+        "last_name": "🚫",
+        "username": "huxleykirafton@gmail.com",
+        "password": "Kd71@wPsN5"
+    },
+    {
+        "first_name": "Catrinel",
+        "last_name": "🚫",
+        "username": "catrinsaelns199@gmail.com",
+        "password": "Zm64#rJkW9"
+    },
+    {
+        "first_name": "Brennick",
+        "last_name": "🚫",
+        "username": "brreemnnickbnox82@gmail.com",
+        "password": "Yw38!dHmQ2"
+    },
+    {
+        "first_name": "Sylvara",
+        "last_name": "🚫",
+        "username": "sylvarjko6ight77@gmail.com",
+        "password": "Tc55@vBnL6"
+    },
+    {
+        "first_name": "Ondrej",
+        "last_name": "🚫",
+        "username": "ondrej0pkalmar33@gmail.com",
+        "password": "Nq47#eSxK3"
+    },
+    {
+        "first_name": "Fiorentina",
+        "last_name": "🚫",
+        "username": "fiorenntinahvirx@gmail.com",
+        "password": "Gp19!uYcM8"
+    },
+    {
+        "first_name": "Zephran",
+        "last_name": "🚫",
+        "username": "zephranbkoldwell@gmail.com",
+        "password": "Rj62@oTlV4"
+    },
+    {
+        "first_name": "Lyndorel",
+        "last_name": "🚫",
+        "username": "lyndorelhjo0anks55@gmail.com",
+        "password": "Wh93#iKpU7"
+    },
+]
+
 # ── In-Memory Storage ──────────────────────────────────────────────────────────
-user_balance = {}   # { user_id: float }
-user_state   = {}   # { user_id: str }  — tracks conversation state
+user_balance      = {}   # { user_id: float }
+user_state        = {}   # { user_id: str }
+user_used_accounts = {}  # { user_id: set of username strings }
+user_current_task = {}   # { user_id: account dict } — account shown for current task
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 def get_balance(uid: int) -> float:
@@ -27,6 +100,19 @@ def get_state(uid: int) -> str:
 
 def clear_state(uid: int):
     user_state.pop(uid, None)
+
+def get_available_account(uid: int):
+    """Return a random unused account for this user, or None if all used."""
+    used = user_used_accounts.get(uid, set())
+    available = [acc for acc in ACCOUNT_POOL if acc["username"] not in used]
+    if not available:
+        return None
+    return random.choice(available)
+
+def mark_account_used(uid: int, username: str):
+    if uid not in user_used_accounts:
+        user_used_accounts[uid] = set()
+    user_used_accounts[uid].add(username)
 
 # ── Keyboards ─────────────────────────────────────────────────────────────────
 def main_menu_keyboard():
@@ -64,13 +150,27 @@ def withdraw_method_keyboard():
 def cmd_start(message):
     uid = message.from_user.id
     clear_state(uid)
+    user_current_task.pop(uid, None)
+
+    # Notify owner about new user
+    try:
+        bot.send_message(
+            OWNER_ID,
+            f"👤 New User Started Bot!\n"
+            f"• Name: {message.from_user.full_name}\n"
+            f"• Username: @{message.from_user.username or 'N/A'}\n"
+            f"• User ID: {uid}"
+        )
+    except Exception:
+        pass
+
     bot.send_message(
         uid,
         "Hi Sir , Welcome To My Earn Zone",
         reply_markup=main_menu_keyboard()
     )
 
-# ── /addbalance  (owner only) ─────────────────────────────────────────────────
+# ── /addbalance (owner only) ───────────────────────────────────────────────────
 @bot.message_handler(commands=["addbalance"])
 def cmd_add_balance(message):
     if message.from_user.id != OWNER_ID:
@@ -91,20 +191,31 @@ def cmd_add_balance(message):
 
     new_balance = get_balance(target_uid) + amount
     set_balance(target_uid, new_balance)
+
     bot.send_message(
         message.chat.id,
         f"✅ Added {amount:.2f}$ to user {target_uid}.\n"
         f"New balance: {new_balance:.2f}$"
     )
 
+    # Notify the user their balance was topped up
+    try:
+        bot.send_message(
+            target_uid,
+            f"🎉 Your balance has been updated!\n"
+            f"💰 New Balance: {new_balance:.2f}$"
+        )
+    except Exception:
+        pass
+
 # ── Main Text Handler ─────────────────────────────────────────────────────────
 @bot.message_handler(func=lambda m: True, content_types=["text"])
 def handle_text(message):
-    uid  = message.from_user.id
-    text = message.text.strip()
+    uid   = message.from_user.id
+    text  = message.text.strip()
     state = get_state(uid)
 
-    # ── Awaiting withdrawal addresses ─────────────────────────────────────────
+    # ── Awaiting withdrawal input ─────────────────────────────────────────────
     if state == "awaiting_binance_address":
         _process_withdrawal(uid, message, method="Binance")
         return
@@ -113,9 +224,10 @@ def handle_text(message):
         _process_withdrawal(uid, message, method="bkash")
         return
 
-    # ── Main Menu ─────────────────────────────────────────────────────────────
+    # ── Main Menu Buttons ─────────────────────────────────────────────────────
     if text == "1️⃣ Tasks":
         clear_state(uid)
+        user_current_task.pop(uid, None)
         bot.send_message(uid, "📋 Choose a task:", reply_markup=tasks_keyboard())
 
     elif text == "2️⃣ Wallet":
@@ -135,18 +247,40 @@ def handle_text(message):
             reply_markup=withdraw_method_keyboard()
         )
 
-    # ── Tasks ─────────────────────────────────────────────────────────────────
+    # ── Task Flow ─────────────────────────────────────────────────────────────
     elif text == "Create Account - Earn 0.35$":
         clear_state(uid)
+        account = get_available_account(uid)
+
+        if account is None:
+            # All accounts exhausted for this user
+            bot.send_message(
+                uid,
+                "⚠️ Email not available.\n\n"
+                "You have already used all available accounts. "
+                "Please wait for new tasks to be added.",
+                reply_markup=tasks_keyboard()
+            )
+            return
+
+        # Store which account we showed this user for this task session
+        user_current_task[uid] = account
+
         account_info = (
-            "First Name 📛 = Deogrej\n"
-            "Last Name = 🚫\n"
-            "Username 👾 = Sekanulkejixas1918@gmail.com\n"
-            "Password 🔑 = FAIiowla6HS72"
+            f"First Name 📛 = {account['first_name']}\n"
+            f"Last Name = {account['last_name']}\n"
+            f"Username 👾 = {account['username']}\n"
+            f"Password 🔑 = {account['password']}"
         )
         bot.send_message(uid, account_info, reply_markup=task_action_keyboard())
 
     elif text == "Done ✅":
+        # Mark the account as used only when user confirms Done
+        account = user_current_task.get(uid)
+        if account:
+            mark_account_used(uid, account["username"])
+            user_current_task.pop(uid, None)
+
         clear_state(uid)
         bot.send_message(
             uid,
@@ -155,6 +289,8 @@ def handle_text(message):
         )
 
     elif text == "Cancel Create Account ❌":
+        # Do NOT mark account as used — user cancelled
+        user_current_task.pop(uid, None)
         clear_state(uid)
         bot.send_message(
             uid,
@@ -182,6 +318,7 @@ def handle_text(message):
     # ── Back / Fallback ───────────────────────────────────────────────────────
     elif text in ("Back 🔙", "🔙 Back"):
         clear_state(uid)
+        user_current_task.pop(uid, None)
         bot.send_message(
             uid,
             "Hi Sir , Welcome To My Earn Zone",
@@ -189,7 +326,6 @@ def handle_text(message):
         )
 
     else:
-        # Unknown input — nudge user back to menu
         bot.send_message(
             uid,
             "Please use the menu buttons below.",
@@ -204,7 +340,7 @@ def _process_withdrawal(uid: int, message, method: str):
     if bal < 2.0:
         bot.send_message(
             uid,
-            "Minimum withdrawal is 2$.",
+            "❌ Minimum withdrawal is 2$.",
             reply_markup=main_menu_keyboard()
         )
     else:
@@ -214,6 +350,20 @@ def _process_withdrawal(uid: int, message, method: str):
             "✅ Your Withdrawal request Submitted.",
             reply_markup=main_menu_keyboard()
         )
+
+        # Notify owner about withdrawal request
+        try:
+            bot.send_message(
+                OWNER_ID,
+                f"💸 Withdrawal Request!\n"
+                f"• Method: {method}\n"
+                f"• Address/Number: {message.text.strip()}\n"
+                f"• Amount: {bal:.2f}$\n"
+                f"• User ID: {uid}\n"
+                f"• Name: {message.from_user.full_name}"
+            )
+        except Exception:
+            pass
 
 # ── Run ───────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
