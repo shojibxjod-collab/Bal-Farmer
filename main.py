@@ -166,7 +166,7 @@ def main_menu_keyboard():
 
 def tasks_keyboard():
     kb = ReplyKeyboardMarkup(resize_keyboard=True)
-    kb.row(KeyboardButton("📧 Create Account - Earn 0.05$"))
+    kb.row(KeyboardButton("📧 Create Account - Earn 0.35$"))
     kb.row(KeyboardButton("🔙 Back"))
     return kb
 
