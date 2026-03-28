@@ -62,6 +62,7 @@ def generate_unique_email(first, last):
     while attempts < 50:
         style = random.randint(1, 4)
         num   = random.randint(10, 9999)
+        sep = random.choice(["", "", ""])
         domain = random.choice(EMAIL_DOMAINS)
 
         if style == 1:
@@ -158,7 +159,7 @@ def time_until_next_bonus(uid):
 # ── Keyboards ──────────────────────────────────────────────────────────────────
 def main_menu_keyboard():
     kb = ReplyKeyboardMarkup(resize_keyboard=True)
-    kb.row(KeyboardButton("💹 Tasks"),      KeyboardButton("👝 Wallet"))
+    kb.row(KeyboardButton(" Tasks"),      KeyboardButton("👝 Wallet"))
     kb.row(KeyboardButton(" $ Withdraw"),   KeyboardButton(" 🫂 Referral"))
     kb.row(KeyboardButton("🎁 Daily Bonus"), KeyboardButton("👤 Profile"))
     return kb
