@@ -389,7 +389,7 @@ def handle_text(message):
     elif text == "🫂 Referral":
         clear_state(uid)
         bot_info  = bot.get_me()
-        ref_link  = f"[t.me](https://t.me/{bot_info.username}?start={uid})"
+        ref_link  = f"https://t.me/{bot_info.username}?start={uid}"
         ref_count = get_profile(uid).get("referrals", 0)
         bot.send_message(
             uid,
