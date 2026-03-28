@@ -62,7 +62,7 @@ def generate_unique_email(first, last):
     while attempts < 50:
         style = random.randint(1, 4)
         num   = random.randint(10, 9999)
-        sep = random.choice(["", "", ""])
+        sep = random.choice([".", "_", "-"])
         domain = random.choice(EMAIL_DOMAINS)
 
         if style == 1:
