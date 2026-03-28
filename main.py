@@ -40,8 +40,8 @@ user_last_bonus     = {}   # { uid: timestamp }
 user_referrals      = {}   # { uid: [referred_uid, ...] }
 all_used_usernames  = set() # globally unique emails
 
-DAILY_BONUS_AMOUNT   = 0.10
-REFERRAL_BONUS       = 0.20
+DAILY_BONUS_AMOUNT   = 0.05
+REFERRAL_BONUS       = 0.05
 DAILY_BONUS_INTERVAL = 86400  # 24 hours in seconds
 
 # ── Account Generator ──────────────────────────────────────────────────────────
@@ -62,7 +62,6 @@ def generate_unique_email(first, last):
     while attempts < 50:
         style = random.randint(1, 4)
         num   = random.randint(10, 9999)
-        sep   = random.choice([".", "_", ""])
         domain = random.choice(EMAIL_DOMAINS)
 
         if style == 1:
@@ -159,14 +158,14 @@ def time_until_next_bonus(uid):
 # ── Keyboards ──────────────────────────────────────────────────────────────────
 def main_menu_keyboard():
     kb = ReplyKeyboardMarkup(resize_keyboard=True)
-    kb.row(KeyboardButton("1️⃣ Tasks"),      KeyboardButton("2️⃣ Wallet"))
-    kb.row(KeyboardButton("3️⃣ Withdraw"),   KeyboardButton("4️⃣ Referral"))
+    kb.row(KeyboardButton("💹 Tasks"),      KeyboardButton("👝 Wallet"))
+    kb.row(KeyboardButton(" $ Withdraw"),   KeyboardButton(" 🫂 Referral"))
     kb.row(KeyboardButton("🎁 Daily Bonus"), KeyboardButton("👤 Profile"))
     return kb
 
 def tasks_keyboard():
     kb = ReplyKeyboardMarkup(resize_keyboard=True)
-    kb.row(KeyboardButton("📧 Create Account - Earn 0.35$"))
+    kb.row(KeyboardButton("📧 Create Account - Earn 0.30$"))
     kb.row(KeyboardButton("🔙 Back"))
     return kb
 
@@ -190,7 +189,7 @@ def withdraw_method_keyboard():
 # ── Welcome Message ────────────────────────────────────────────────────────────
 def send_main_menu(uid, custom_text=None):
     text = custom_text or (
-        "💎 *Earn Zone*\n"
+        "💎 *Earn Farmer*\n"
         "━━━━━━━━━━━━━━━\n"
         "Welcome Sir! 👋\n\n"
         "Select an option below 👇"
