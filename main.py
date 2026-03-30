@@ -42,11 +42,11 @@ all_used_usernames  = set()
 # { uid: { "account": {...}, "submitted_at": timestamp } }
 pending_tasks = {}
 
-TASK_REWARD          = 0.30
-DAILY_BONUS_AMOUNT   = 0.05
-REFERRAL_BONUS       = 0.05
+TASK_REWARD          = 0.20
+DAILY_BONUS_AMOUNT   = 0.15
+REFERRAL_BONUS       = 0.10
 DAILY_BONUS_INTERVAL = 86400
-MIN_WITHDRAWAL       = 2.00
+MIN_WITHDRAWAL       = 5.00
 
 # ══════════════════════════════════════════════════════════════════════════════
 # ACCOUNT GENERATION
