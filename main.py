@@ -43,7 +43,7 @@ banned_users        = set()
 # { uid: { "account": {...}, "submitted_at": timestamp } }
 pending_tasks = {}
 
-TASK_REWARD          = 0.25
+TASK_REWARD          = 0.30
 DAILY_BONUS_AMOUNT   = 0.15
 REFERRAL_BONUS       = 0.10
 DAILY_BONUS_INTERVAL = 86400
@@ -189,7 +189,7 @@ def main_menu_keyboard():
 
 def tasks_keyboard():
     kb = ReplyKeyboardMarkup(resize_keyboard=True)
-    kb.row(KeyboardButton("📧 Create Account - Earn 0.25$"))
+    kb.row(KeyboardButton("📧 Create Account - Earn 0.30$"))
     kb.row(KeyboardButton("🔙 Back"))
     return kb
 
